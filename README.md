@@ -51,3 +51,17 @@ Build ke Executable:
 ```bash
 pyinstaller --onefile --windowed tiramisu_server.py
 ```
+---
+
+## Alur Penggunaan
+- Gunakan password minimal 12–14 karakter
+- Password salah → dekripsi gagal total
+- Cocok untuk edukasi dan demonstrasi kriptografi
+- Bukan pengganti software keamanan profesional
+---
+
+## Tujuan Project Based Learning (PBL)
+- Memahami alur enkripsi dan dekripsi file
+- Mengimplementasikan AES-GCM dan PBKDF2 secara nyata
+- Mempelajari integritas data dan secure file handling
+- Simulasi backup data aman menggunakan SSH
