@@ -210,7 +210,6 @@ class TiramisuGUI(QWidget):
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.file_input)
         file_layout.addWidget(browse)
-
         
         btns = QHBoxLayout()
         btns.addWidget(enc)
@@ -319,4 +318,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = TiramisuGUI()
     window.show()
+
     sys.exit(app.exec_())
