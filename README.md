@@ -1,36 +1,46 @@
-# Tiramisu🍰
-Tiramisu: Advanced File Encryption using AES-256 GCM and PBKDF2.
+# Tiramisu
 
-Tiramisu PBKDF2 adalah aplikasi enkripsi file lokal berbasis AES-256-GCM dengan PBKDF2 sebagai derivasi key dari password. Dibuat untuk Project Based Learning (PBL) dengan fokus keamanan dasar + praktik nyata.
+**Tiramisu** adalah aplikasi enkripsi file lokal yang mengimplementasikan **AES-256-GCM** dengan **PBKDF2** sebagai mekanisme derivasi key dari password.  
+Proyek ini dibuat untuk **Project Based Learning (PBL)** dengan tujuan menggabungkan konsep kriptografi dasar dan praktik keamanan dunia nyata.
 
-Fitur utama:
-1. Enkripsi file dengan AES-256-GCM
-2. Password → Key via PBKDF2 (200.000 iterasi)
-3. Proteksi integritas (file diubah → decrypt gagal)
-4. GUI sederhana (PyQt5)
-5. Backup file ke server via SSH (SFTP)
+---
 
-Alur sigkat:
-1. Pilih / drag file
+## Deskripsi Singkat
+
+Tiramisu mengenkripsi file secara lokal menggunakan password pengguna.  
+Password tidak digunakan langsung, tetapi diproses melalui **PBKDF2 (Password-Based Key Derivation Function 2)** dengan iterasi tinggi untuk menghasilkan key kriptografi yang kuat.
+
+Mode **AES-GCM (Galois/Counter Mode)** memastikan:
+- Kerahasiaan data
+- Autentikasi
+- Integritas file
+
+Jika file diubah sekecil apa pun, proses dekripsi akan gagal.
+
+---
+
+## Fitur Utama
+
+- Enkripsi file menggunakan **AES-256-GCM**
+- Derivasi key dari password via **PBKDF2 (200.000 iterasi)**
+- Proteksi integritas otomatis (tamper detection)
+- Antarmuka GUI sederhana berbasis **PyQt5**
+- Backup file terenkripsi ke server Linux via **SSH (SFTP)**
+
+---
+
+## Alur Penggunaan
+
+1. Pilih atau drag & drop file
 2. Masukkan password
-3. Klik Encrypt → file jadi .tira
-4. Klik Decrypt untuk mengembalikan
-5. (Opsional) Backup File ke server Linux
+3. Klik **Encrypt** → file berubah menjadi `.tira`
+4. Klik **Decrypt** untuk mengembalikan file
+5. (Opsional) Backup file terenkripsi ke server
 
-Kebutuhan:
+---
+
+## Kebutuhan Sistem
+
+Install dependensi:
+```bash
 pip install pyqt5 pycryptodome paramiko pyinstaller
-
-Build ke EXR (Windows):
-pyinstaller --onefile --windowed tiramisu_server.py
-
-Catatan penggunaan:
-1. Password minimal 12–14 karakter
-2. Salah password → decrypt gagal total
-3. Cocok untuk edukasi & demonstrasi kriptografi
-4. Bukan pengganti software keamanan profesional
-
-Tujuan PBL:
-1. Memahami alur enkripsi file
-2. Implementasi AES-GCM + PBKDF2
-3. Praktik integritas data & secure file handling
-4. Simulasi backup aman via SSH
