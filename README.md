@@ -44,3 +44,10 @@ Jika file diubah sekecil apa pun, proses dekripsi akan gagal.
 Install dependensi:
 ```bash
 pip install pyqt5 pycryptodome paramiko pyinstaller
+```
+
+## 
+Build ke Executable:
+```bash
+pyinstaller --onefile --windowed tiramisu_server.py
+```
