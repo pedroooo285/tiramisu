@@ -1,5 +1,5 @@
 #tiramisu_pbkdf2_server
-import os, sys, struct, paramiko, ctypes
+import os, sys, struct, paramiko
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QPushButton, QLabel, QLineEdit,
     QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QFrame
@@ -56,25 +56,32 @@ class TiramisuCrypto:
                 return None
 
             salt = get_random_bytes(16)
-            iv   = get_random_bytes(12)
             key  = TiramisuCrypto.derive_key(password.encode(), salt)
 
             out = input_file + ".tira"
             tmp = out + ".tmp"
 
-            cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
-            cipher.update(TiramisuCrypto._aad(salt, iv))
-
-            header = TiramisuCrypto._build_header(salt, iv)
-
             with open(input_file, "rb") as fin, open(tmp, "wb") as fout:
-                fout.write(header)
+                fout.write(
+                    TiramisuCrypto.MAGIC +
+                    TiramisuCrypto.VERSION +
+                    struct.pack(">I", len(salt)) + salt
+                )
 
                 for chunk in TiramisuCrypto._stream_chunks(fin):
-                    fout.write(cipher.encrypt(chunk))
+                    nonce = get_random_bytes(12)
+                    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+                    cipher.update(TiramisuCrypto.MAGIC + TiramisuCrypto.VERSION + salt)
 
-                tag = cipher.digest()
-                fout.write(tag)
+                    data = cipher.encrypt(chunk)
+                    tag  = cipher.digest()
+
+                    fout.write(
+                        nonce +
+                        struct.pack(">I", len(data)) +
+                        data +
+                        tag
+                    )
 
             os.replace(tmp, out)
             if auto_delete:
@@ -101,34 +108,27 @@ class TiramisuCrypto:
                 if fin.read(2) != TiramisuCrypto.VERSION:
                     return None
 
-                salt, iv, _ = TiramisuCrypto._parse_header(fin)
-                header_size = fin.tell()
+                salt_len = struct.unpack(">I", fin.read(4))[0]
+                salt = fin.read(salt_len)
 
                 key = TiramisuCrypto.derive_key(password.encode(), salt)
-
-                fin.seek(-16, os.SEEK_END)
-                tag = fin.read(16)
-
-                cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
-                cipher.update(TiramisuCrypto._aad(salt, iv))
-
-                file_size = os.path.getsize(input_file)
-                ciphertext_len = file_size - header_size - 16
-
-                fin.seek(header_size)
 
                 out = input_file[:-5] if input_file.endswith(".tira") else input_file + ".dec"
 
                 with open(out, "wb") as fout:
-                    remaining = ciphertext_len
-                    while remaining > 0:
-                        chunk = fin.read(min(TiramisuCrypto.CHUNK_SIZE, remaining))
-                        if not chunk:
+                    while True:
+                        nonce = fin.read(12)
+                        if not nonce:
                             break
-                        fout.write(cipher.decrypt(chunk))
-                        remaining -= len(chunk)
 
-                cipher.verify(tag)
+                        size = struct.unpack(">I", fin.read(4))[0]
+                        data = fin.read(size)
+                        tag  = fin.read(16)
+
+                        cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+                        cipher.update(TiramisuCrypto.MAGIC + TiramisuCrypto.VERSION + salt)
+
+                        fout.write(cipher.decrypt_and_verify(data, tag))
 
             if auto_delete:
                 os.remove(input_file)
@@ -210,7 +210,7 @@ class TiramisuGUI(QWidget):
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.file_input)
         file_layout.addWidget(browse)
-        
+
         btns = QHBoxLayout()
         btns.addWidget(enc)
         btns.addWidget(dec)
@@ -268,12 +268,11 @@ class TiramisuGUI(QWidget):
         if not local_path or not os.path.isfile(local_path):
             QMessageBox.critical(self, "Error", "File belum dipilih atau path tidak valid.")
             return
-
         try:
             host = "127.0.1.1"
             port = 22
             username = "kali"
-            password = "kali"
+            password = "123juarap"
             remote_dir = "/home/kali/backup"
             filename = os.path.basename(local_path)
             remote_path = f"{remote_dir}/{filename}"
@@ -318,5 +317,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = TiramisuGUI()
     window.show()
-
     sys.exit(app.exec_())
