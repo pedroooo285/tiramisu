@@ -211,6 +211,7 @@ class TiramisuGUI(QWidget):
         file_layout.addWidget(self.file_input)
         file_layout.addWidget(browse)
 
+        
         btns = QHBoxLayout()
         btns.addWidget(enc)
         btns.addWidget(dec)
@@ -268,11 +269,12 @@ class TiramisuGUI(QWidget):
         if not local_path or not os.path.isfile(local_path):
             QMessageBox.critical(self, "Error", "File belum dipilih atau path tidak valid.")
             return
+
         try:
-            host = "127.0.1.1"
+            host = "127.0.0.1"
             port = 22
             username = "kali"
-            password = "123juarap"
+            password = "kali"
             remote_dir = "/home/kali/backup"
             filename = os.path.basename(local_path)
             remote_path = f"{remote_dir}/{filename}"
